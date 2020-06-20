@@ -5,17 +5,17 @@ class String # :nodoc:
   def to_table_title
     %(<div><strong style='font-size: 18px;'>#{self}</strong></div>)
   end
-  
+
   # Adds anchor tag to the self text with an URL
   def to_link(link = '#')
     %(<a href='#{link}'>#{self}</a>)
   end
-  
+
   # Wraps the self text to <strong>
   def to_bold
     %(<strong>#{self}</strong>)
   end
-  
+
   # Wraps the self text to <em>
   def to_italic
     %(<em>#{self}</em>)
@@ -31,28 +31,29 @@ class Array
   # @note Initial data will be changed!
   # @return [Array] sorted and ranked array of hashes
   def ranking!(base_key, rank_key: 'rank', asc: false)
-    self.sort! { |a, b| (asc ? 1 : -1) * (a[base_key].to_f - b[base_key].to_f) <=> 0 }
-    self.map.with_index do |row, index|
+    sort! { |a, b| (asc ? 1 : -1) * (a[base_key].to_f - b[base_key].to_f) <=> 0 }
+    map.with_index do |row, index|
       row[rank_key] = row[base_key] == self[index - 1][base_key] ? self[index - 1][rank_key] : index + 1
     end
     self
   end
-  
+
   # Makes full deep copy of array with all nested arrays or hashes like the method deep_dup from ActiveSupport class
   def deep_copy
     Marshal.load(Marshal.dump(self))
   end
-  
+
   # Counts and returns percentile of index of +self+ if +self+ is ordered by descent. When index is 0 the method
   # returns 99, when index is last it returns 1.
   #
   # @param index [Integer] wouldn't more than self.size
   # @return {Integer} the percentile of index
   def percentile(index)
-    raise "The index is #{index} -- it cannot be more than #{self.size}" if index > self.size
-    99 - ((index) / (self.count.to_f - 1) * 98).round
+    raise "The index is #{index} -- it cannot be more than #{size}" if index > size
+
+    99 - ((index) / (count.to_f - 1) * 98).round
   end
-  
+
   # Gets an array of hashes and convert it to json contains a tables with headers
   #
   # @param table_columns [Array<Hash>] contains an array of hashes, where each hash have to contain keys :heading and :column
@@ -66,7 +67,7 @@ class Array
   # @return [JSON] prepared table
   def build_table(table_columns)
     table = []
-    self.map do |self_row|
+    map do |self_row|
       table << {}
       table_columns.map { |table_cell| table.last[table_cell[:heading]] = self_row[table_cell[:column]] }
     end

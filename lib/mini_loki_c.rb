@@ -32,4 +32,4 @@ module MiniLokiC
   end
 end
 
-MiniLokiC.run
+# MiniLokiC.run
