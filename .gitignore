@@ -1,0 +1,19 @@
+# Ignore bundler config.
+/.bundle
+
+# Ignore all logfiles and tempfiles.
+/log/*
+!/log/.keep
+
+# Ignore git's files
+/.git
+
+# Ignore RubyMine's files
+/.idea
+
+# Gemfile.lock
+/Gemfile.lock
+
+# test samples
+/hle/samples/*
+!/hle/samples/.gitkeep
