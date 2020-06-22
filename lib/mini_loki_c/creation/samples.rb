@@ -19,7 +19,12 @@ module MiniLokiC
       def basic_html_substitutions_body(sample)
         output = sample[:body].gsub(/(?:^|\n\n|\n\t)(.+)(?:\n\n*|\n\t|$)/, '<p>\1</p>')
         '<html><head><title></title><style></style></head>'\
-        "<body style='width: 50%;'><h1>#{sample[:headline]}</h1>#{output}</body></html>"
+          "<body style='width: 50%;'>"\
+            "<h1>#{sample[:headline]}</h1>"\
+            "<h4>#{sample[:teaser]}</h4>"\
+            "#{output}"\
+          '</body>'\
+        '</html>'
       end
     end
   end
