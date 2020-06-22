@@ -39,11 +39,14 @@ module MiniLokiC
         cell = "<div style=\"padding:10px;text-align: center;\">#{value}</div>"
 
         '<div style="display:table-cell; border-style: solid; border-width: 1px;">'\
-        "#{header ? "<b>#{cell}</b>" : cell}</div>"
+          "#{header ? "<b>#{cell}</b>" : cell}"\
+        '</div>'
       end
 
       def to_table_row(row)
-        "<div style=\"display:table-row; border-style: solid; border-width: 1px;\">#{row.join}</div>"
+        '<div style="display:table-row; border-style: solid; border-width: 1px;">'\
+          "#{row.join}"\
+        '</div>'
       end
     end
   end
