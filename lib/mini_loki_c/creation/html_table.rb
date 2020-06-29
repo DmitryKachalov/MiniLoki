@@ -36,7 +36,7 @@ module MiniLokiC
       end
 
       def to_table_cell(value, header = false)
-        cell = '<div style="padding: 10px; text-align: center;">'\
+        cell = "<div style=\"padding: 10px;#{header ? ' text-align: center;' : ''}\">"\
                  "#{value}"\
                '</div>'
 
