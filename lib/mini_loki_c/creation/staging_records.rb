@@ -21,9 +21,9 @@ module MiniLokiC
       end
 
       def rows
-        query = "select * from `#{@staging_table}` "\
-                "#{@options['where'] ? "where #{@options['where']}" : ''}"\
-                "#{@options['limit'] ? "limit #{@options['limit'].to_i}" : ''}"
+        query = "SELECT * FROM `#{@staging_table}` "\
+                "#{@options['where'] ? "WHERE #{@options['where']}" : ''}"\
+                "#{@options['limit'] ? "LIMIT #{@options['limit'].to_i}" : ''}"
 
         conn = Connect::Mysql.on(DB01, 'lokic')
         result = conn.query(query)
