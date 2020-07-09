@@ -4,6 +4,7 @@ module MiniLokiC
   # methods for read .ini files and
   # derive options
   module Configuration
+    module_function
     def read_old_db
       user = {}
 
