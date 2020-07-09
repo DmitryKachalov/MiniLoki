@@ -3,8 +3,7 @@
 module MiniLokiC
   # methods for read .ini files and
   # derive options
-  module Configuration
-    module_function
+  module Initialization
     def read_old_db
       user = {}
 
@@ -28,25 +27,6 @@ module MiniLokiC
       end
 
       user
-    end
-
-    def query_pl(query_here)
-      try_number = 0
-      begin
-        pl_user = read_ini['pl_user']
-        client = Mysql.on(PL_PROD_DB_HOST, 'jnswire_prod', pl_user['user'], pl_user['password'])
-        results = client.query(query_here)
-        client.close
-        results
-      rescue => e
-        if try_number < 5
-          sleep 3**try_number
-          try_number += 1
-          retry
-        else
-          raise e
-        end
-      end
     end
 
     def read_ini
