@@ -7,3 +7,5 @@ gem 'mysql2'
 gem 'json'
 # this gem helps to set color for text
 gem 'colorize'
+
+gem 'faraday'
