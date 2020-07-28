@@ -8,8 +8,7 @@ module MiniLokiC
         module_function
 
         def calculate_percent(curr, prev, sign = false)
-          return '--' if [curr, prev].include?('Insufficient data')
-          return '0' if curr.eql?('0')
+          return 0 if curr.to_i.eql?(0)
 
           res = ((curr.to_f - prev) / prev) * 100
           res = sign ? res : res.abs
@@ -17,9 +16,7 @@ module MiniLokiC
         end
 
         def format_percentage(value, symbol = false)
-          value = "#{('%.1f' % value.to_f).to_s.sub(/\.0$/, '')}#{symbol ? '%' : ''}"
-          value = '-' if value.match(/NaN/)
-          value
+          "#{'%.1f'.format(value.to_f).to_s.sub(/\.0$/, '')}#{symbol ? '%' : ''}"
         end
       end
     end

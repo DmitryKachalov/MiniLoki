@@ -162,11 +162,28 @@ class S1
       district_table = HtmlTable.common(stage['district_table'])
       story_table = HtmlTable.common(stage['story_table'])
 
-      salary_difference = superintendent_salary - elementary_salary
+      salary_diff = superintendent_salary - elementary_salary
+      high_salary_diff = high_superintendent_salary - high_elementary_salary
+      diff_text = Formatize::Money.add_commas(salary_diff.abs)
+      more_less = salary_diff.positive? ? 'more' : 'less'
 
-      sample[:headline] = "Superintendent of #{district} school district earns #{} more than the elementary school principals during #{period} school year"
-      sample[:teaser]
+      superintendent_salary_text = Formatize::Money.add_commas(superintendent_salary)
+      elementary_salary_text = Formatize::Money.add_commas(elementary_salary)
+      high_superintendent_salary_text = Formatize::Money.add_commas(high_superintendent_salary)
+      high_elementary_salary_text = Formatize::Money.add_commas(high_elementary_salary)
 
+      ca_edu_link = 'California Department of Education'.to_link('https://www.cde.ca.gov/')
+      us_edu_link = 'National Education Association'.to_link('https://blogs.edweek.org/teachers/teaching_now/2019/04/which_states_have_the_highest_and_lowest_teacher_salaries.html')
+      policy_inst_link = 'Learning Policy Institute'.to_link('https://learningpolicyinstitute.org/product/interactive-map-understanding-teacher-shortages-california?utm_source=LPI+Master+List&utm_campaign=d4d19cd741-LPIMC_CATeacherShortageInteractive_20191205&utm_medium=email&utm_term=0_7e60dfa1d8-d4d19cd741-42305231')
+
+      sample[:headline] = "Superintendent of #{district} school district earns "\
+                          "#{diff_text} #{more_less} "\
+                          "than the elementary school principals during #{period} school year"
+      sample[:teaser] = "During the #{period} school year, the superintendent of #{district} school district "\
+                        "earned #{diff_text} #{more_less} than the district's elementary school teachers."
+
+      output = "During the #{period} school year, the superintendent in #{district} earned #{superintendent_salary}, "\
+               "according to the #{ca_edu_link}. This was % more than the average elementary principal salary of $_elementary_principal_salary. "
 
 
       samples.insert(sample)
