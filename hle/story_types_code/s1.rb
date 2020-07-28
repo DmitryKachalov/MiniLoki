@@ -153,8 +153,21 @@ class S1
       sample[:organization_ids] = stage['organization_ids']
       sample[:time_frame] = stage['time_frame']
 
-      sample[:headline]
+      period = "#{sample[:time_frame].to_i - 1}-#{sample[:time_frame]}"
+      district = stage['district']
+      superintendent_salary = stage['superintendent_salary']
+      elementary_salary = stage['elementary_salary']
+      high_superintendent_salary = stage['high_superintendent_salary']
+      high_elementary_salary = stage['high_elementary_salary']
+      district_table = HtmlTable.common(stage['district_table'])
+      story_table = HtmlTable.common(stage['story_table'])
+
+      salary_difference = superintendent_salary - elementary_salary
+
+      sample[:headline] = "Superintendent of #{district} school district earns #{} more than the elementary school principals during #{period} school year"
       sample[:teaser]
+
+
 
       samples.insert(sample)
     end
