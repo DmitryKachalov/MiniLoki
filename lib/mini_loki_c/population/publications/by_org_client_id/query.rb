@@ -4,7 +4,7 @@ module MiniLokiC
   module Population
     module Publications
       # Queries for getting publications by client id
-      class ByClientId < Publications::Base
+      class ByOrgClientId < Publications::Base
         private
 
         def pubs_query

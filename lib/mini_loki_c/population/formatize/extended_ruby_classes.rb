@@ -38,6 +38,25 @@ class Array
     self
   end
 
+  def ranking_new!(base_key, rank_key: 'rank', asc: false)
+    return self if empty?
+
+    sort_by! { |row| (asc ? 1 : -1) * row[base_key] }
+    curr_value = first[base_key]
+    curr_rank = 1
+
+    to_enum.with_index(1) do |row, index|
+      unless row[base_key].eql?(curr_value)
+        curr_value = row[base_key]
+        curr_rank = index
+      end
+
+      row[rank_key] = curr_rank
+    end
+
+    self
+  end
+
   # Makes full deep copy of array with all nested arrays or hashes like the method deep_dup from ActiveSupport class
   def deep_copy
     Marshal.load(Marshal.dump(self))
