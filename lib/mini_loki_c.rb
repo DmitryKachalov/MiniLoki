@@ -24,8 +24,6 @@ module MiniLokiC
     options = derive_options({})
     raise ArgumentError, "Please pass '--story_type' argument." unless options['story_type']
 
-
-    puts options
     if options['population']
       MiniLokiC::Code.execute(:population, options)
     elsif options['creation']

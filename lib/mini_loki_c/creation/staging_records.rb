@@ -24,12 +24,7 @@ module MiniLokiC
         query = "SELECT * FROM `#{@staging_table}` "\
                 "#{@options['where'] ? "WHERE #{@options['where']}" : ''}"\
                 "#{@options['limit'] ? "LIMIT #{@options['limit'].to_i}" : ''}"
-
-        conn = Connect::Mysql.on(DB01, 'lokic')
-        result = conn.query(query)
-        conn.close
-
-        result
+        Connect::Mysql.exec_query(DB02, 'loki_storycreator', query)
       end
     end
   end

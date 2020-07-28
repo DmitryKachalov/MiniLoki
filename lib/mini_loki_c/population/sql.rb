@@ -11,9 +11,21 @@ module MiniLokiC
         values = []
         updates = []
 
-        options.map do |(k, v)|
+        options.map do |(k, val)|
           key = "`#{k}`"
-          value = v.nil? ? 'null' : v.to_s.to_json
+          value =
+            case val
+            when String
+              val.dump
+            when TrueClass
+              1
+            when FalseClass
+              0
+            when NilClass
+              'NULL'
+            else
+              val.to_json.dump
+            end
 
           keys << key
           values << value

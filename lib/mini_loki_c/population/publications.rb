@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'publications/base.rb'
-require_relative 'publications/by_client_id.rb'
+require_relative 'publications/by_org_client_id.rb'
 require_relative 'publications/metric_media.rb'
 require_relative 'publications/from_lat_lon.rb'
 
@@ -12,8 +12,8 @@ module MiniLokiC
 
       # The methods are returned an array of hashes like this:
       # [{"id"=>2072, "name"=>"Hawkeye Reporter", "client_id"=>158, "client_name"=>"MM - Iowa "}]
-      def by_client_id(org_id, client_ids = [])
-        ByClientId.new(org_id, client_ids).pubs
+      def by_org_client_id(org_id, client_ids = [])
+        ByOrgClientId.new(org_id, client_ids).pubs
       end
 
       def mm(org_id, states = [])
