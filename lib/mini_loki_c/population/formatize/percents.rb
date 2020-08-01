@@ -16,7 +16,7 @@ module MiniLokiC
         end
 
         def format_percentage(value, symbol = false)
-          "#{'%.1f'.format(value.to_f).to_s.sub(/\.0$/, '')}#{symbol ? '%' : ''}"
+          "#{('%.1f' % value.to_f).to_s.sub(/\.0$/, '')}#{symbol ? '%' : ''}"
         end
       end
     end

@@ -154,25 +154,25 @@ module MiniLokiC
           }
         }</style>'
       end
-    end
 
-    def quote(arr)
-      return if arr.nil?
+      def quote(arr)
+        return if arr.nil?
 
-      if arr[0].is_a?(Array)
-        arr.map { |v| quote(v) }
-      else
-        arr.map { |v| v.to_s.gsub('%%%', '"') }
+        if arr[0].is_a?(Array)
+          arr.map { |v| quote(v) }
+        else
+          arr.map { |v| v.to_s.gsub('%%%', '"') }
+        end
       end
-    end
 
-    def unquote(arr)
-      return if arr.nil?
+      def unquote(arr)
+        return if arr.nil?
 
-      if arr[0].is_a?(Array)
-        arr.map { |v| unquote(v) }
-      else
-        arr.map { |v| v.to_s.gsub('"', '%%%') }
+        if arr[0].is_a?(Array)
+          arr.map { |v| unquote(v) }
+        else
+          arr.map { |v| v.to_s.gsub('"', '%%%') }
+        end
       end
     end
   end
