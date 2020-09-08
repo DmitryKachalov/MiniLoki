@@ -41,8 +41,66 @@ module MiniLokiC
         '<table class="hle">' + header + '<tbody>' + content + footer + '</tbody></table>'
       end
 
-      def to_html_with_style
-        style + to_html
+      def ranking!(arg = -1, rank_key: 'Rank', asc: false)
+        return self if @content.empty?
+
+        clmn_numb =
+          case arg
+          when Integer then arg
+          when String then @header.index(arg)
+          end
+
+        return self if clmn_numb.nil?
+
+        begin
+          @content.sort_by! { |row| (asc ? 1 : -1) * row[clmn_numb] }
+        rescue TypeError
+          p 'Attention! comparing non-digit values!'
+          @content.sort_by! { |row| row[clmn_numb] }
+          @content.reverse! unless asc
+        end
+
+        curr_value = @content.first[clmn_numb]
+        curr_rank = 1
+        free_numb = @content.first.size
+
+        @content.map.with_index(1) do |row, index|
+          unless row[clmn_numb].eql?(curr_value)
+            curr_value = row[clmn_numb]
+            curr_rank = index
+          end
+
+          row[free_numb] = curr_rank
+          row.unshift(row.pop)
+        end
+
+        @header.unshift(rank_key)
+
+        self
+      end
+
+      def delete_empty_columns!(empty_value = '')
+        empty_cols = []
+        (0..@header.count-1).each do |col_num|
+          empty_cols << col_num if @content.all? { |r| r[col_num] == empty_value }
+        end
+
+        empty_cols.reverse.each do |col_num|
+          @content.each do |arr|
+            arr.delete_at(col_num)
+          end
+          @header.delete_at(col_num)
+          @footer&.delete_at(col_num)
+        end
+        self
+      end
+
+      def empty?
+        @content.empty?
+      end
+
+      def self.json_to_html(json)
+        StoryTable.new.from_json(json).to_html
       end
 
       private
@@ -61,98 +119,6 @@ module MiniLokiC
             raise 'Column count should be the same in all parts of a table!'
           end
         end
-      end
-
-      def style
-        '<style>table.hle {
-          width: 100%;
-          margin: 0 1em 1em 0;
-          font-size: .8em;
-          height: auto;
-          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 100%;
-          font: inherit;
-        }
-        table.hle thead {
-          border-bottom: 2px solid #000;
-          font-size: .8em;
-          font-weight: 700;
-          vertical-align: bottom;
-          text-transform: uppercase
-        }
-        table.hle th {
-          font-weight: 400;
-          text-align: left;
-          padding: .5em .5em .2em;
-          line-height: 1.4em;
-          vertical-align: bottom;
-        }
-        table.hle td {
-          border-bottom: 1px solid #cdcdcd;
-          text-align: left;
-          vertical-align: middle;
-          line-height: 1.35em;
-          padding: .25em .5em;
-          height: 100%
-        }
-        table.hle tr.last td {
-          border-bottom: 1px solid #222222;
-        }
-        table.hle tr.footer td {
-          font-weight: 700;
-            box-sizing: border-box;
-          font-smoothing: antialiased;
-          background-color: #f0f0f0;
-          text-rendering: optimizeLegibility
-        }
-        @media only screen and (max-width:1024px) {
-          table.hle td,
-          table.hle th {
-            font-size: 95%!important
-          }
-        }
-        @media only screen and (max-width:960px) {
-          table.hle td,
-          table.hle th {
-            font-size: 90%!important
-          }
-        }
-        @media only screen and (max-width:924px) {
-          table.hle td,
-          table.hle th {
-            font-size: 85%!important
-          }
-        }
-        @media only screen and (max-width:894px) {
-          table.hle td,
-          table.hle th {
-            font-size: 80%!important
-          }
-        }
-        @media only screen and (max-width:860px) {
-          table.hle td,
-          table.hle th {
-            font-size: 75%!important
-          }
-        }
-        @media only screen and (max-width:450px) {
-          table.hle td,
-          table.hle th {
-            font-size: 70%!important
-          }
-        }
-        @media only screen and (max-width:400px) {
-          table.hle td,
-          table.hle th {
-            font-size: 65%!important
-          }
-        }
-        @media only screen and (max-width:370px) {
-          table.hle td,
-          table.hle th {
-            font-size: 60%!important
-          }
-        }</style>'
       end
 
       def quote(arr)

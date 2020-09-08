@@ -15,10 +15,6 @@ module MiniLokiC
           )
         end
 
-        def pubs
-          get(pubs_query)
-        end
-
         private
 
         def get(query)

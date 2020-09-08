@@ -10,12 +10,22 @@ module MiniLokiC
           username = user[:username]
           password = user[:password]
         end
+        fallen = 0
 
-        Mysql2::Client.new(
-          host: host, database: database,
-          username: username, password: password,
-          connect_timeout: 180, reconnect: true, encoding: 'utf8'
-        )
+        begin
+          Mysql2::Client.new(
+            host: host, database: database,
+            username: username, password: password,
+            connect_timeout: 180, reconnect: true,
+            encoding: 'utf8'
+          )
+        rescue Mysql2::Error => e
+          raise Mysql2::Error, e if fallen > 3
+
+          fallen += 1
+          sleep(3)
+          retry
+        end
       end
 
       def self.exec_query(host, database, query)

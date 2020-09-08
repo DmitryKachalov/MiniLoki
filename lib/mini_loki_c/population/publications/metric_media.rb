@@ -15,6 +15,10 @@ module MiniLokiC
           @org_id = org_id
         end
 
+        def pubs
+          get(pubs_query)
+        end
+
         def pubs_excluding_states
           get(pubs_excluding_states_query)
         end

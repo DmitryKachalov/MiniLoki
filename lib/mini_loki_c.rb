@@ -14,6 +14,8 @@ require_relative 'mini_loki_c/code.rb'
 require_relative 'pipeline.rb'
 require_relative 'pipeline_replica.rb'
 
+require_relative 'hle_tools.rb'
+
 # local version of LokiC for test
 # population/creation code and
 # upload/download it to/from DB.
@@ -22,18 +24,21 @@ module MiniLokiC
 
   def self.execute!
     options = derive_options({})
-    raise ArgumentError, "Please pass '--story_type' argument." unless options['story_type']
 
-    if options['population']
-      MiniLokiC::Code.execute(:population, options)
-    elsif options['creation']
-      MiniLokiC::Code.execute(:creation, options)
-    elsif options['upload']
-      MiniLokiC::Code.upload(options)
-    elsif options['download']
-      MiniLokiC::Code.download(options)
+    if options['story_type']
+      if options['population']
+        MiniLokiC::Code.execute(:population, options)
+      elsif options['creation']
+        MiniLokiC::Code.execute(:creation, options)
+      elsif options['upload']
+        MiniLokiC::Code.upload(options)
+      elsif options['download']
+        MiniLokiC::Code.download(options)
+      end
+    elsif options['tool']
+      HleTools.call(options)
     else
-      raise ArgumentError
+      raise ArgumentError, 'Please pass me one of these arguments: population creation upload download tool'
     end
   end
 end

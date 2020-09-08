@@ -195,22 +195,26 @@ class S1
 
       output = "During the #{period} school year, the superintendent in #{district} "\
                "earned #{superintendent_salary_txt}, according to the #{ca_edu_link}. "\
-               "This was #{percent_diff} percent #{more_less} than the average elementary principal "\
+               "This was #{percent_diff} percent #{more_less} than the average elementary school principal "\
                "salary of #{elementary_salary_txt}.\n"
-      output += 'The district that had the highest pay among its superintendents was '\
-                "#{high_district} with a salary of #{high_superintendent_salary_txt} "\
+
+      output += "#{high_district}, with an average salary of #{high_superintendent_salary_txt}, "\
+                'was the district that had the highest pay among its superintendents '\
                 "while the highest compensated elementary school principal made #{high_elementary_salary_txt}.\n"
+
       output += 'Salaries for teachers vary widely based on geographic region. '\
                 "According to the #{us_edu_link}, there is roughly a $40,000 "\
                 "pay difference between teachers in California and Mississippi.\n"
+
       output += 'While California ranks second in average salaries according to the NEA, '\
                 "the #{policy_inst_link} estimates that 80 percent of its school districts "\
                 'are experiencing teacher shortages. Because of these shortages, 34 percent '\
                 "of newly-hired teachers have substandard teaching credentials.\n"
-      output += "Pay per position in #{district} on average"
+
+      output += "Pay per position in #{district} on average".to_table_title
       output += district_table
       output += "\n"
-      output += "Pay per position in #{district} on average".to_table_title
+      output += 'Districts ranked by superintendent pay'.to_table_title
       output += story_table
 
       sample[:body] = output
@@ -218,3 +222,4 @@ class S1
     end
   end
 end
+

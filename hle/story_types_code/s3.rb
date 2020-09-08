@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-class S1
+class S3
   include MiniLokiC::Connect
   include MiniLokiC::Population
   include MiniLokiC::Creation
 
-  STAGING_TABLE = 's1_staging'
+  STAGING_TABLE = 's3_staging'
 
   def districts_salaries_query(school_year)
     %(select root.district_code,
@@ -98,8 +98,8 @@ class S1
     high_district = db01.query(query).first
     high_superintendent_district = high_district['name']
     high_superintendent_salary = high_district['max']
-    query = query_max_salary_for(school_year, 'Average Principal Salary (Elementary)')
-    high_elementary_salary = db01.query(query).first['max']
+    query = query_max_salary_for(school_year, 'Average Principal Salary (High)')
+    higest_high_school_salary = db01.query(query).first['max']
 
     gen_query = districts_salaries_query(school_year)
     districts = db01.query(gen_query).to_a.ranking_new!('salary')
@@ -110,12 +110,12 @@ class S1
       district_data = db01.query(dist_query).to_a
 
       superintendent_match = district_data.find { |row| row['category'].eql?('Superintendent Salary') }
-      elementary_match = district_data.find { |row| row['category'].eql?('Average Principal Salary (Elementary)') }
+      high_school_match = district_data.find { |row| row['category'].eql?('Average Principal Salary (High)') }
       org_ids = district_data.first['pl_org_id']
-      next if superintendent_match.nil? || elementary_match.nil? || org_ids.nil?
+      next if superintendent_match.nil? || high_school_match.nil? || org_ids.nil?
 
       superintendent_salary = superintendent_match['salary']
-      elementary_salary = elementary_match['salary']
+      high_school_salary = high_school_match['salary']
       dist_table = district_table(district_data)
 
       publications = org_ids.split(',').map do |org_id|
@@ -136,10 +136,10 @@ class S1
         raw['time_frame'] = time_frame
         raw['district'] = dist['district']
         raw['superintendent_salary'] = superintendent_salary
-        raw['elementary_salary'] = elementary_salary
+        raw['high_school_principal_salary'] = high_school_salary
         raw['high_district'] = high_superintendent_district
-        raw['high_superintendent_salary'] = high_superintendent_salary
-        raw['high_elementary_salary'] = high_elementary_salary
+        raw['superintendent_salary_high'] = high_superintendent_salary
+        raw['high_school_principal_salary_high'] = higest_high_school_salary
         raw['district_table'] = dist_table
         raw['story_table'] = story_type_table
 
@@ -166,48 +166,46 @@ class S1
       period = "#{sample[:time_frame].to_i - 1}-#{sample[:time_frame]}"
       district = stage['district']
       superintendent_salary = stage['superintendent_salary']
-      elementary_salary = stage['elementary_salary']
+      high_school_principal_salary = stage['high_school_principal_salary']
       high_district = stage['high_district']
-      high_superintendent_salary = stage['high_superintendent_salary']
-      high_elementary_salary = stage['high_elementary_salary']
+      superintendent_salary_high = stage['superintendent_salary_high']
+      high_school_principal_salary_high = stage['high_school_principal_salary_high']
       district_table = StoryTable.new.from_json(stage['district_table']).to_html
       story_table = StoryTable.new.from_json(stage['story_table']).to_html
 
-      salary_diff = superintendent_salary - elementary_salary
-      diff_txt = Formatize::Money.add_commas(salary_diff.abs)
-      percent_diff = Formatize::Percents.calculate_percent(superintendent_salary, elementary_salary)
+      salary_diff = superintendent_salary - high_school_principal_salary
+      percent_diff = Formatize::Percents.calculate_percent(superintendent_salary, high_school_principal_salary)
       more_less = salary_diff.positive? ? 'more' : 'less'
       superintendent_salary_txt = Formatize::Money.add_commas(superintendent_salary)
-      elementary_salary_txt = Formatize::Money.add_commas(elementary_salary)
-      high_superintendent_salary_txt = Formatize::Money.add_commas(high_superintendent_salary)
-      high_elementary_salary_txt = Formatize::Money.add_commas(high_elementary_salary)
+      high_school_salary_txt = Formatize::Money.add_commas(high_school_principal_salary)
+      high_superintendent_salary_txt = Formatize::Money.add_commas(superintendent_salary_high)
+      high_principal_salary_high_txt = Formatize::Money.add_commas(high_school_principal_salary_high)
 
       ca_edu_link = 'California Department of Education'.to_link('https://www.cde.ca.gov/')
       us_edu_link = 'National Education Association'.to_link('https://blogs.edweek.org/teachers/teaching_now/2019/04/which_states_have_the_highest_and_lowest_teacher_salaries.html')
       policy_inst_link = 'Learning Policy Institute'.to_link('https://learningpolicyinstitute.org/product/interactive-map-understanding-teacher-shortages-california?utm_source=LPI+Master+List&utm_campaign=d4d19cd741-LPIMC_CATeacherShortageInteractive_20191205&utm_medium=email&utm_term=0_7e60dfa1d8-d4d19cd741-42305231')
 
-      sample[:headline] = "Superintendent of #{district} school district earns "\
-                          "#{diff_txt} #{more_less} "\
-                          "than the elementary school principals during #{period} school year"
-      sample[:teaser] = "During the #{period} school year, the superintendent "\
-                        "of #{district} school district earned #{diff_txt} #{more_less} than "\
-                        "the district's elementary school teachers."
+      sample[:headline] = "Superintendent of #{district} school district earns #{superintendent_salary_txt} during #{period} school year"
+      sample[:teaser] = "During the #{period} school year, the superintendent of #{district} school district earned #{superintendent_salary_txt}."
 
       output = "During the #{period} school year, the superintendent in #{district} "\
                "earned #{superintendent_salary_txt}, according to the #{ca_edu_link}. "\
-               "This was #{percent_diff} percent #{more_less} than the average elementary principal "\
-               "salary of #{elementary_salary_txt}.\n"
+               "This was #{percent_diff} percent #{more_less} than the average "\
+               "high school principal salary of #{high_school_salary_txt}.\n"
+
       output += 'The district that had the highest pay among its superintendents was '\
-                "#{high_district} with a salary of #{high_superintendent_salary_txt} "\
-                "while the highest compensated elementary school principal made #{high_elementary_salary_txt}.\n"
-      output += 'Salaries for teachers vary widely based on geographic region. '\
+                "#{high_district}, with a salary of #{high_superintendent_salary_txt}, "\
+                "while the highest compensated high school principal made #{high_principal_salary_high_txt}.\n"
+
+      output += 'Salaries for teachers vary widely based on geographical region. '\
                 "According to the #{us_edu_link}, there is roughly a $40,000 "\
                 "pay difference between teachers in California and Mississippi.\n"
+
       output += 'While California ranks second in average salaries according to the NEA, '\
                 "the #{policy_inst_link} estimates that 80 percent of its school districts "\
                 'are experiencing teacher shortages. Because of these shortages, 34 percent '\
                 "of newly-hired teachers have substandard teaching credentials.\n"
-      output += "Pay per position in #{district} on average"
+      output += "Pay per position in #{district} on average".to_table_title
       output += district_table
       output += "\n"
       output += 'Districts ranked by superintendent pay'.to_table_title

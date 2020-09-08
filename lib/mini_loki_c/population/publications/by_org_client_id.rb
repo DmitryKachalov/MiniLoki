@@ -12,6 +12,10 @@ module MiniLokiC
           @client_ids = client_ids.join(',')
           @org_id = org_id
         end
+
+        def pubs
+          get(pubs_query)
+        end
       end
     end
   end
