@@ -12,10 +12,9 @@ class S5
     db01 = Mysql.on(DB01, 'usa_raw')
     db02 = Mysql.on(DB02, 'loki_storycreator')
 
-
     publications = [
-        Publications.by_org_client_id(org_id, [120]),
-        Publications.mm_excluding_states(org_id, ['California'])
+      Publications.by_org_client_id(org_id, [120]),
+      Publications.mm_excluding_states(org_id, ['California'])
     ]
 
     publications.flatten.uniq.each do |publication|
