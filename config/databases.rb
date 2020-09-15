@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Host of PL production DB replica (readonly!)
-PL_PROD_DB_HOST = 'pipeline-core-replica2.rds.locallabs.com'
+PL_PROD_DB_HOST = 'pipeline-core-replica4.rds.locallabs.com'
 # pipeline-core-replica.rds.locallabs.com == jnswire2-readonly.rds.locallabs.com
 
 # Host of PL staging DB replica (readonly!)
