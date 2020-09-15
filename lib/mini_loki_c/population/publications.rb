@@ -4,6 +4,7 @@ require_relative 'publications/base.rb'
 require_relative 'publications/by_org_client_id.rb'
 require_relative 'publications/metric_media.rb'
 require_relative 'publications/from_lat_lon.rb'
+require_relative 'publications/by_state.rb'
 
 module MiniLokiC
   module Population
@@ -26,6 +27,10 @@ module MiniLokiC
 
       def mm_only_states(org_id, states = [])
         MetricMedia.new(org_id, states).pubs_only_states
+      end
+
+      def mm_by_state(state)
+        ByState.new(state).pubs
       end
     end
   end
