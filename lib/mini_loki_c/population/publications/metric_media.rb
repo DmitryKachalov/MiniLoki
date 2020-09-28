@@ -7,8 +7,8 @@ module MiniLokiC
     module Publications
       class MetricMedia < Publications::Base
         # org_id [int]    -- pipeline_organization_id.
-        # states [string] -- this parameter is optional. If you need to limit the list of states, please pass the states
-        #                    you are interested in, separated by commas e.g.: 'Michigan,Iowa,North Carolina'
+        # states [Array]  -- this parameter is optional. If you need to limit the list of states, please pass the states
+        #                    you are interested in e.g.: ['Michigan', 'Iowa', 'North Carolina']
         def initialize(org_id: nil, states: nil)
           super()
           @client_ids = mm_ids(states)
