@@ -9,7 +9,7 @@ module MiniLokiC
         # org_id [int]    -- pipeline_organization_id.
         # states [string] -- this parameter is optional. If you need to limit the list of states, please pass the states
         #                    you are interested in, separated by commas e.g.: 'Michigan,Iowa,North Carolina'
-        def initialize(org_id, states = [])
+        def initialize(org_id: nil, states: nil)
           super()
           @client_ids = mm_ids(states)
           @org_id = org_id
@@ -30,15 +30,10 @@ module MiniLokiC
         private
 
         def mm_ids(states)
-          ids_states = @route.query(ids_query).to_a
+          mm_states = @route.query(ids_query).to_a
+          mm_states = mm_states.keep_if { |row| states.include?(row['state']) } if states.any?
 
-          if states.any?
-            ids_states = ids_states.keep_if do |row|
-              states.include?(row['state'])
-            end
-          end
-
-          ids_states.map { |row| row['client_id'] }.join(',')
+          mm_states.map { |row| row['client_id'] }.join(',')
         end
       end
     end
