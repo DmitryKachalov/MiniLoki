@@ -22,7 +22,7 @@ class S13
 
   def pubs_query
     %(select c.id id,
-           c.name publication_name,
+           c.name name,
            cc.id client_id,
            cc.name client_name
     from jnswire_prod.client_companies cc
@@ -51,7 +51,7 @@ class S13
     pl_core = PipelineReplica[:production].pl_replica
     publications = pl_core.query(pubs_query).to_a
 
-    publications = publications.reject { |e| forbidden_pubs.include?(e['publication_name'].upcase) }
+    publications = publications.reject { |e| forbidden_pubs.include?(e['name'].upcase) }
     stage_max_period = loki_db.query(max_period_in_stage_query).first['stage_max_period']
     max_report_date = db13.query(max_report_date_query).first['date']
 
@@ -83,7 +83,7 @@ class S13
 
       period_data.each do |data|
         publications.each do |publication|
-          next if publication['publication_name'].empty?
+          next if publication['name'].empty?
 
           hash = {}
           hash['client_id'] = publication['client_id']
@@ -96,7 +96,7 @@ class S13
           hash['merchant_wholesaler'] = data['category']
           hash['month'] = stage_max_period.strftime('%B')
           hash['year'] = stage_max_period.strftime('%Y')
-          hash['sum'] = data['sum']
+          hash['sum'] = data['sum'].to_i
 
           query = SQL.insert_on_duplicate_key(STAGING_TABLE, hash)
           loki_db.query(query)
@@ -111,19 +111,25 @@ class S13
   end
 
   def creation(options)
-    @stage_selection.each do |stage|
-      export = {}
+    samples = Samples.new(STAGING_TABLE, options)
+
+    StagingRecords[STAGING_TABLE, options].each do |stage|
+      sample = {}
+      sample[:staging_row_id] = stage['id']
+      sample[:publication_id] = stage['publication_id']
+      sample[:organization_ids] = stage['organization_ids']
+      sample[:time_frame] = stage['time_frame']
 
       merchant_wholesaler = stage['merchant_wholesaler'].gsub(/^\d{4,}: /, '')
       month = stage['month']
       year = stage['year']
-      sum = number_to_money(stage['sum'] * 1_000_000)
+      sum = Formatize::Money.huge_money_to_text(stage['sum'] * 1_000_000)
 
-      export['headline'] = %(#{merchant_wholesaler.capitalize} wholesalers report #{sum} in #{month} inventories)
-      export['teaser'] = %(Inventories held by #{merchant_wholesaler} wholesalers in #{month} #{year} were valued ) +
-        %(at #{sum}, according to the )
+      sample[:headline] = %(#{merchant_wholesaler.capitalize} wholesalers report #{sum} in #{month} inventories)
+      sample[:teaser] = %(Inventories held by #{merchant_wholesaler} wholesalers in #{month} #{year} were valued ) +
+                        %(at #{sum}, according to the )
 
-      output = export['teaser'] + 'U.S. Census Bureau'.to_link('https://www.census.gov/') + ".\n"
+      output = sample[:teaser] + 'U.S. Census Bureau'.to_link('https://www.census.gov/') + ".\n"
       output += %(The data is after adjustment for seasonal variations and trading day differences, but not for price changes.\n)
       output += %(The Census Bureau conducts a monthly wholesale trade survey in order to provide )
       output += %(an up-to-date indication of sales and inventory trends for U.S. merchant wholesalers, )
@@ -133,8 +139,10 @@ class S13
       output += %(end-of-month inventories, number of establishments covered by the report, )
       output += %(and the ending date of the reporting period.)
 
-      export['teaser'] += 'U.S. Census Bureau.'
-      prepare_output(stage, output, export, options)
+      sample[:body] = output
+      sample[:teaser] += 'U.S. Census Bureau.'
+
+      samples.insert(sample)
     end
   end
 end
