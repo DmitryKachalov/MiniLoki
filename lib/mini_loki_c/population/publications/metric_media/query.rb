@@ -89,8 +89,7 @@ module MiniLokiC
         end
 
         def pubs_by_passed_state_query
-          %|select o.name org_name,
-                   c.id as id,
+          %|select c.id as id,
                    c.name as name,
                    cc.id as client_id,
                    cc.name as client_name

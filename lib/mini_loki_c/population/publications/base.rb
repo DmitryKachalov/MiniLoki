@@ -22,8 +22,8 @@ module MiniLokiC
 
           if publications.any?
             puts "--\n\n"
-            puts 'organization id:    ' + @org_id.to_s.green
-            puts 'organization name:  ' + publications.first['org_name'].green
+            puts "organization id:    #{@org_id.to_s.green}" if @org_id
+            puts "organization name:  #{publications.first['org_name'].green}" if publications.first['org_name']
             puts "\npublication(s):"
 
             publications.each do |p|
