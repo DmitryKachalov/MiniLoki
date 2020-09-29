@@ -36,8 +36,9 @@ module MiniLokiC
         def mm_ids(states)
           mm_states = @route.query(ids_query).to_a
           mm_states = mm_states.keep_if { |row| states.include?(row['state']) } if states.any?
+          ids = mm_states.map { |row| row['client_id'] }.join(',')
 
-          mm_states.map { |row| row['client_id'] }.join(',')
+          ids.empty? ? '0' : ids
         end
       end
     end
