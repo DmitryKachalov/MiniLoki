@@ -13,7 +13,7 @@ require_relative 'mini_loki_c/code.rb'
 
 require_relative 'pipeline.rb'
 require_relative 'pipeline_replica.rb'
-
+require_relative 'export_backdated_stories.rb'
 require_relative 'hle_tools.rb'
 
 # local version of LokiC for test
@@ -37,6 +37,8 @@ module MiniLokiC
       end
     elsif options['tool']
       HleTools.call(options)
+    elsif options['export_backdated']
+      ExportBackdatedStories.find_and_export!
     else
       raise ArgumentError, 'Please pass me one of these arguments: population creation upload download tool'
     end

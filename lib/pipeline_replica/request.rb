@@ -7,6 +7,7 @@ module PipelineReplica
   module Request
     include Job
     include JobItem
+    include Organization
     include ClientsPublicationsTags
     include Sections
     include PhotoBuckets
