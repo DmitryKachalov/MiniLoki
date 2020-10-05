@@ -47,7 +47,7 @@ class ExportBackdatedStories
               message = "*Backdated export* -- #{e}\n"\
                         'Sample was skipped. *Export continued...*'
 
-              Slack::Web::Client.chat_postMessage(
+              Slack::Web::Client.new.chat_postMessage(
                 channel: 'hle_loki_errors',
                 text: message
               )
@@ -66,7 +66,7 @@ class ExportBackdatedStories
     end
 
   rescue StandardError => e
-    Slack::Web::Client.chat_postMessage(
+    Slack::Web::Client.new.chat_postMessage(
       channel: 'hle_loki_errors',
       text: "export backdated stories dropped.\nWhy? > #{e}"
     )

@@ -18,8 +18,10 @@ module ExportBackdated
       lead_id = lead_post(sample, exp_config)
       story_id = story_post(lead_id, sample, exp_config, connections[:pl_replica])
 
+      pp "#{sample['id']}, #{story_id}"
+
       query = update_sample_query(sample['id'], story_id)
-      @lokic_db_client.query(query)
+      connections[:lokic_db].query(query)
     end
 
     def lead_post(sample, exp_config)
