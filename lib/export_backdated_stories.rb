@@ -65,6 +65,11 @@ class ExportBackdatedStories
       break if Time.now > (@started_at + 86_000)
     end
 
+  rescue StandardError => e
+    Slack::Web::Client.chat_postMessage(
+      channel: 'hle_loki_errors',
+      text: "export backdated stories dropped.\nWhy? > #{e}"
+    )
   ensure
     @pl_replica_client.close
     @lokic_db_client.close
