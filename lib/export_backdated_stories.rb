@@ -24,6 +24,7 @@ class ExportBackdatedStories
   end
 
   def export!
+    exported = 0
     exp_config_ids.each do |exp_config_id|
       exp_config = exp_config_by(exp_config_id)
       exp_config['section_ids'] = story_section_ids_by(exp_config['client_name'])
@@ -43,14 +44,12 @@ class ExportBackdatedStories
               break if sample.nil? || Time.now > (@started_at + 86_000)
 
               lead_story_post(sample, exp_config, thread_connections)
+              exported += 1
             rescue ExportBackdated::Error => e
               message = "*Backdated export* -- #{e}\n"\
                         'Sample was skipped. *Export continued...*'
 
-              Slack::Web::Client.new.chat_postMessage(
-                channel: 'hle_loki_errors',
-                text: message
-              )
+              Slack::Web::Client.new.chat_postMessage(channel: 'hle_loki_errors', text: message)
             end
 
           ensure
@@ -63,6 +62,13 @@ class ExportBackdatedStories
       end
 
       break if Time.now > (@started_at + 86_000)
+    end
+
+    if exported > 1
+      Slack::Web::Client.new.chat_postMessage(
+        channel: 'hle_lokic_messages',
+        text: "#{exported} backdate stories were exported on #{Date.today}."
+      )
     end
 
   rescue StandardError => e
