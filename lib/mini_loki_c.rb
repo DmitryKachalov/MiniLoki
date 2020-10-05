@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require 'time'
+
 require 'mysql2'
 require 'json'
 require 'colorize'
+require 'slack-ruby-client'
 
 require_relative '../config/databases.rb'
 require_relative 'mini_loki_c/connect/mysql.rb'
@@ -40,9 +43,15 @@ module MiniLokiC
     elsif options['export_backdated']
       ExportBackdatedStories.find_and_export!
     else
-      raise ArgumentError, 'Please pass me one of these arguments: population creation upload download tool'
+      raise ArgumentError,
+            'Please pass me one of these arguments: '\
+            'population creation upload download tool export_backdated'
     end
   end
+end
+
+Slack.configure do |config|
+  config.token = MiniLokiC.read_ini['slack_app_token']['token']
 end
 
 if ARGV.any?

@@ -1,22 +1,17 @@
 # frozen_string_literal: true
 
-require_relative 'export_backdated/job_item.rb'
-require_relative 'export_backdated/export_parameters.rb'
 require_relative 'export_backdated/lead_story_post.rb'
-require_relative 'export_backdated/story_update.rb'
 require_relative 'export_backdated/query.rb'
 require_relative 'export_backdated/section.rb'
+require_relative 'export_backdated/error.rb'
 
 class ExportBackdatedStories
   include ExportBackdated::Query
-  include ExportBackdated::JobItem
   include ExportBackdated::Section
-  include ExportBackdated::ExportParameters
   include ExportBackdated::LeadStoryPost
-  include ExportBackdated::StoryUpdate
 
   def self.find_and_export!
-    new.export!
+    new.send(:export!)
   end
 
   private
@@ -25,33 +20,42 @@ class ExportBackdatedStories
     @started_at = Time.now
     @pl_client = Pipeline[:production]
     @pl_replica_client = PipelineReplica[:production]
-    @lokic_db_client = Mysql.on(DB02, 'lokic')
-    # @job_item_key = 'production_job_item'
-    # @pl_id_key = 'pl_production_id'
+    @lokic_db_client = MiniLokiC::Connect::Mysql.on(DB02, 'lokic')
   end
 
   def export!
     exp_config_ids.each do |exp_config_id|
       exp_config = exp_config_by(exp_config_id)
-      exp_config['job_item_id'] ||= job_item_id(exp_config)
       exp_config['section_ids'] = story_section_ids_by(exp_config['client_name'])
-      next if failed?(exp_config)
 
       samples_in_batches(exp_config_id) do |batch|
         semaphore = Mutex.new
 
-        threads = Array.new(4) do
+        threads = Array.new(5) do
           Thread.new do
+            thread_connections = {
+              pl_replica: PipelineReplica[:production],
+              lokic_db: MiniLokiC::Connect::Mysql.on(DB02, 'lokic')
+            }
+
             loop do
               sample = semaphore.synchronize { batch.shift }
               break if sample.nil? || Time.now > (@started_at + 86_000)
 
-              story_id = lead_story_post(exp_config, sample)
-              organization_ids = sample['org_ids'].delete('[ ]').split(',')
-              story_update(story_id, organization_ids)
+              lead_story_post(sample, exp_config, thread_connections)
+            rescue ExportBackdated::Error => e
+              message = "*Backdated export* -- #{e}\n"\
+                        'Sample was skipped. *Export continued...*'
 
-              update_sample(sample['id'], story_id)
+              Slack::Web::Client.chat_postMessage(
+                channel: 'hle_loki_errors',
+                text: message
+              )
             end
+
+          ensure
+            thread_connections[:pl_replica].close
+            thread_connections[:lokic_db].close
           end
         end
 
@@ -60,11 +64,14 @@ class ExportBackdatedStories
 
       break if Time.now > (@started_at + 86_000)
     end
+
+  ensure
+    @pl_replica_client.close
+    @lokic_db_client.close
   end
 
   def exp_config_ids
-    @lokic_db_client.query(export_config_ids_query)
-                    .to_a.map { |row| row['exp_conf_id'] }
+    @lokic_db_client.query(export_config_ids_query).to_a.map { |row| row['exp_conf_id'] }
   end
 
   def exp_config_by(id)
@@ -80,10 +87,5 @@ class ExportBackdatedStories
 
       yield(samples_to_export)
     end
-  end
-
-  def update_sample(sample_id, story_id)
-    query = update_sample_query(sample_id, story_id)
-    @lokic_db_client.query(query)
   end
 end

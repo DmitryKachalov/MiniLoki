@@ -51,7 +51,7 @@ module ExportBackdated
                o.teaser,
                o.body,
                s.published_at,
-               s.organization_ids org_ids
+               s.organization_ids
         from samples s
             join outputs o
                 on s.output_id = o.id
@@ -64,7 +64,9 @@ module ExportBackdated
 
     def update_sample_query(id, story_id)
       %(update samples
-        set pl_production_id = #{story_id} where id = #{id};)
+        set pl_production_id = #{story_id},
+            exported_at = current_timestamp()
+        where id = #{id};)
     end
   end
 end
