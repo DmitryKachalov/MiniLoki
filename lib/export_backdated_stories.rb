@@ -67,7 +67,7 @@ class ExportBackdatedStories
     if exported > 1
       Slack::Web::Client.new.chat_postMessage(
         channel: 'hle_lokic_messages',
-        text: "#{exported} backdate stories were exported on #{Date.today}."
+        text: "#{exported} backdate stories were exported during #{Date.today}."
       )
     end
 
