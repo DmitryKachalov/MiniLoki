@@ -76,9 +76,9 @@ class S18
       committee_contributions = db01.query("select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{year}
                                        and month(received_date) = #{month} and cash_amount > 0 and site_source_committee_id = '#{row['registered_entity_id']}';").to_a.map{|i| i['contribution_amount']}
 
-      median_contribution = median(committee_contributions)
+      median_contribution = median(committee_contributions).to_f.round
 
-      table.content << [row['rank'], row['committee_name'], Formatize::Money.add_commas(row['month_amount']), Formatize::Money.add_commas(median_contribution)]
+      table.content << [row['rank'], row['committee_name'], Formatize::Money.add_commas(row['month_amount'].to_f.round), Formatize::Money.add_commas(median_contribution)]
     end
 
     committees_num = table.content.size
