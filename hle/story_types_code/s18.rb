@@ -53,16 +53,39 @@ class S18
    limit 50;)
   end
 
-  def story_type_table(raw_committees)
-    districts = raw_districts.map do |row|
+  def committees_contributions_query(m, y, id)
+    %(select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{y}
+                                       and month(received_date) = #{m} and cash_amount > 0 and registered_entity_id = '#{row['registered_entity_id']}';)
+  end
+
+
+  def story_type_table(raw_committees, yr, mn)
+    raw_committees do |row|
+      id = row['registered_entity_id']
+      committees_contributions = committees_contributions_query(mn, yr, id)
+
       [
           row['rank'],
-          row['district'],
-          Formatize::Money.add_commas(row['salary'])
+          row['committee_name'],
+          Formatize::Money.add_commas(row['month_amount'],
+                                      median)
       ]
     end
 
-    StoryTable.new(header: %w[Rank District Salary], content: districts).to_json
+
+
+
+
+    commitees = raw_committees.map do |row|
+      [
+          row['rank'],
+          row['committee_name'],
+          Formatize::Money.add_commas(row['month_amount'],
+                                      median)
+      ]
+    end
+
+    StoryTable.new(header: %w[Rank District Salary], content: commitees).to_json
   end
 
 
@@ -73,24 +96,13 @@ class S18
 
     year = options['year']
     month = options['month']
+    time_frame = "m:#{month}:#{year}"
     day = month_days(month,year)
     report_date = Date.new(year,month,day)
 
-
-    def districts_salaries_query(school_year)
-      %(select root.district_code,
-             d_info.district,
-             district_amount salary
-      from ca_report_card_teacher_salaries root
-          join ca_report_card_district_contact_info d_info
-              on d_info.district_code = root.district_code
-      where school_year = '#{school_year}' and
-            category = 'Superintendent Salary' and
-            district_amount is not null and
-            district_amount != 0
-      group by root.district_code;)
-    end
-
+    committees = committees_query(month, year).to_a
+    ranked = ranking(committees, 'month_amount')
+    story_type_table(ranked)
 
 
     publications = [
