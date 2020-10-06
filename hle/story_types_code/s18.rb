@@ -37,11 +37,6 @@ class S18
     months[num-1]
   end
 
-  def month_days(mon,yer)
-    mdays = [nil,31,28,31,30,31,30,31,31,30,31,30,31]
-    mdays[2] = 29 if Date.leap?(yer)
-    mdays[mon]
-  end
 
   def committees_query(m, y)
     %(select t1.formatted_name as committee_name, t1.registered_entity_id, t1.pl_production_org_id, t2.month_amount
@@ -76,17 +71,17 @@ class S18
 
 
 
-    commitees = raw_committees.map do |row|
-      [
-          row['rank'],
-          row['committee_name'],
-          Formatize::Money.add_commas(row['month_amount'],
-                                      median)
-      ]
-    end
+  #  commitees = raw_committees.map do |row|
+  #   [
+  #       row['rank'],
+  #        row['committee_name'],
+  #        Formatize::Money.add_commas(row['month_amount'],
+  #                                    median)
+  #    ]
+  #  end
 
-    StoryTable.new(header: %w[Rank District Salary], content: commitees).to_json
-  end
+  # StoryTable.new(header: %w[Rank District Salary], content: commitees).to_json
+  #end
 
 
   def population(options)
@@ -97,13 +92,14 @@ class S18
     year = options['year']
     month = options['month']
     time_frame = "m:#{month}:#{year}"
-    day = month_days(month,year)
-    report_date = Date.new(year,month,day)
+
 
     committees = committees_query(month, year).to_a
     ranked = ranking(committees, 'month_amount')
     #story_type_table(ranked)
 
+    scrape_date = db01.query("select max(last_scrape_date) as scrape_date from from minnesota_campaign_finance_contribution;").to_a[0]['scrape_date'].to_s
+    
     table = StoryTable.new
     table.header = "Rank, Committee, Amount, Median contribution amount".split(', ')
     table.content = []
@@ -111,7 +107,7 @@ class S18
     ranked.each do |row|
       break if table.content.size >= 50
 
-      committee_contributions = db01.client.query("select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{year}
+      committee_contributions = db01.query("select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{year}
                                        and month(received_date) = #{month} and cash_amount > 0 and registered_entity_id = '#{row['registered_entity_id']}';").to_a.map{|i| i['contribution_amount']}
 
       median_contribution = median(committee_contributions)
@@ -123,10 +119,11 @@ class S18
 
     committees.each do |committee|
 
-
+      org_id = committee['pl_production_org_id']
 
     publications = [
         Publications.by_org_client_id(org_id, [120]),
+        Publications.by_org_client_id(org_id, [91]),
         Publications.mm_excluding_states(org_id, ['Minnesota'])
     ]
 
@@ -136,18 +133,23 @@ class S18
       raw['client_name'] = publication['client_name']
       raw['publication_id'] = publication['id']
       raw['publication_name'] = publication['name']
-      raw['organization_ids'] = org_ids
+      raw['organization_ids'] = org_id
 
-      raw['time_frame'] = ''
+      raw['time_frame'] = time_frame
+      raw['committees_num'] = committees_num
+      raw['year'] = year
+      raw['month'] = month
+      raw['scrape_date'] = scrape_date
+      raw['table_data'] = table.to_json
 
       staging_insert_query = SQL.insert_on_duplicate_key(STAGING_TABLE, raw)
       db02.query(staging_insert_query)
     end
+      end
 
     db01.close
     db02.close
     PopulationSuccess[STAGING_TABLE] unless ENV['RAILS_ENV']
-    end
     end
 
   def creation(options)
