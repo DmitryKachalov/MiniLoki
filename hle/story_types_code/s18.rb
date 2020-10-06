@@ -48,41 +48,6 @@ class S18
    limit 50;)
   end
 
-  #def committees_contributions_query(m, y, id)
-  #  %(select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{y}
-  #                                     and month(received_date) = #{m} and cash_amount > 0 and registered_entity_id = #{id};)
-  #end
-
-
-  # def story_type_table(raw_committees, yr, mn)
-  # raw_committees.each do |row|
-  # id = row['registered_entity_id']
-  #   committees_contributions = committees_contributions_query(mn, yr, id)
-  #
-  #   [
-  #       row['rank'],
-  #       row['committee_name'],
-  #       Formatize::Money.add_commas(row['month_amount'],
-  #                                   median)
-  #   ]
-  # end
-
-
-
-
-
-  #  commitees = raw_committees.map do |row|
-  #   [
-  #       row['rank'],
-  #        row['committee_name'],
-  #        Formatize::Money.add_commas(row['month_amount'],
-  #                                    median)
-  #    ]
-  #  end
-
-  # StoryTable.new(header: %w[Rank District Salary], content: commitees).to_json
-  #end
-
 
   def population(options)
     db01 = Mysql.on(DB01, 'usa_raw')
