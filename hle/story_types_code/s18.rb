@@ -53,24 +53,24 @@ class S18
    limit 50;)
   end
 
-  def committees_contributions_query(m, y, id)
-    %(select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{y}
-                                       and month(received_date) = #{m} and cash_amount > 0 and registered_entity_id = '#{row['registered_entity_id']}';)
-  end
+  #def committees_contributions_query(m, y, id)
+  #  %(select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{y}
+  #                                     and month(received_date) = #{m} and cash_amount > 0 and registered_entity_id = #{id};)
+  #end
 
 
-  def story_type_table(raw_committees, yr, mn)
-    raw_committees do |row|
-      id = row['registered_entity_id']
-      committees_contributions = committees_contributions_query(mn, yr, id)
-
-      [
-          row['rank'],
-          row['committee_name'],
-          Formatize::Money.add_commas(row['month_amount'],
-                                      median)
-      ]
-    end
+  # def story_type_table(raw_committees, yr, mn)
+  # raw_committees.each do |row|
+  # id = row['registered_entity_id']
+  #   committees_contributions = committees_contributions_query(mn, yr, id)
+  #
+  #   [
+  #       row['rank'],
+  #       row['committee_name'],
+  #       Formatize::Money.add_commas(row['month_amount'],
+  #                                   median)
+  #   ]
+  # end
 
 
 
@@ -102,7 +102,27 @@ class S18
 
     committees = committees_query(month, year).to_a
     ranked = ranking(committees, 'month_amount')
-    story_type_table(ranked)
+    #story_type_table(ranked)
+
+    table = StoryTable.new
+    table.header = "Rank, Committee, Amount, Median contribution amount".split(', ')
+    table.content = []
+
+    ranked.each do |row|
+      break if table.content.size >= 50
+
+      committee_contributions = db01.client.query("select cash_amount as contribution_amount from minnesota_campaign_finance_contribution where year(received_date) = #{year}
+                                       and month(received_date) = #{month} and cash_amount > 0 and registered_entity_id = '#{row['registered_entity_id']}';").to_a.map{|i| i['contribution_amount']}
+
+      median_contribution = median(committee_contributions)
+
+      table.content << [row['rank'], row['committee_name'], Formatize::Money.add_commas(row['month_amount']), Formatize::Money.add_commas(median_contribution)]
+    end
+
+    committees_num = table.content.size
+
+    committees.each do |committee|
+
 
 
     publications = [
@@ -127,7 +147,8 @@ class S18
     db01.close
     db02.close
     PopulationSuccess[STAGING_TABLE] unless ENV['RAILS_ENV']
-  end
+    end
+    end
 
   def creation(options)
     samples = Samples.new(STAGING_TABLE, options)
