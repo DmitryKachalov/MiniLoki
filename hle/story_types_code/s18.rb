@@ -163,10 +163,28 @@ class S18
       sample[:organization_ids] = stage['organization_ids']
       sample[:time_frame] = stage['time_frame']
 
-      sample[:headline] = ''
-      sample[:teaser] = ''
-      sample[:body] = ''
+      committees_num = stage['committees_num']
+      year = stage['year']
+      month = stage['month'].to_i
+      table = StoryTable.new.from_json(stage['table_data']).to_html
 
+      wi_cf_link = 'Wisconsin Campaign Finance Information System'.to_link('https://cfis.wi.gov/Public/Registration.aspx?page=ReceiptList/')
+
+      sample[:headline] = "What political committees received the most in contributions during #{month_name(month)}?"
+      sample[:teaser] = "Here #{committees_num == 1 ? "is" : "are"} the #{Numbers.digit_to_string(committees_num)} political #{plural('committee', committees_num)} that received #{committees_num >=50 ? "most money from contributions" : "money from contributions"} during #{month_name(month)}."
+
+      output = "Here #{committees_num == 1 ? "is" : "are"} the #{Numbers.digit_to_string(committees_num)} political "\
+               "#{plural('committee', committees_num)} that received #{committees_num >=50 ? "most money from contributions" : "money from contributions"} "\
+               "during #{month_name(month)}, according to the #{wi_cf_link}.\n"
+
+      output += "Donations made to political groups or candidates must be disclosed under state law "\
+                 "for greater transparency in elections. While Congress created the Federal Election Commission "\
+                 "to oversee federal elections in 1974, each state is left to regulate its local elections.\n"
+
+
+      output += "Top committees ranked by total contributions ( #{month_name(month)})".to_table_title
+      output += table
+      sample[:body] = output
       samples.insert(sample)
     end
   end
