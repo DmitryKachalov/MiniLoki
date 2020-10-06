@@ -94,12 +94,13 @@ class S18
     time_frame = "m:#{month}:#{year}"
 
 
-    committees = committees_query(month, year).to_a
+    comms = committees_query(month, year)
+    committees = db01.query(comms).to_a
     ranked = ranking(committees, 'month_amount')
     #story_type_table(ranked)
 
     scrape_date = db01.query("select max(last_scrape_date) as scrape_date from from minnesota_campaign_finance_contribution;").to_a[0]['scrape_date'].to_s
-    
+
     table = StoryTable.new
     table.header = "Rank, Committee, Amount, Median contribution amount".split(', ')
     table.content = []
