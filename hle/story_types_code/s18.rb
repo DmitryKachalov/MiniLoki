@@ -182,7 +182,7 @@ class S18
                  "to oversee federal elections in 1974, each state is left to regulate its local elections.\n"
 
 
-      output += "Top committees ranked by total contributions ( #{month_name(month)})".to_table_title
+      output += "Top committees ranked by total contributions (#{month_name(month)})".to_table_title
       output += table
       sample[:body] = output
       samples.insert(sample)
