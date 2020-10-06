@@ -43,20 +43,27 @@ class S18
     mdays[mon]
   end
 
-  def districts_salaries_query(school_year)
-    %(select root.district_code,
-             d_info.district,
-             district_amount salary
-      from ca_report_card_teacher_salaries root
-          join ca_report_card_district_contact_info d_info
-              on d_info.district_code = root.district_code
-      where school_year = '#{school_year}' and
-            category = 'Superintendent Salary' and
-            district_amount is not null and
-            district_amount != 0
-      group by root.district_code;)
+  def committees_query(m, y)
+    %(select t1.formatted_name as committee_name, t1.registered_entity_id, t1.pl_production_org_id, t2.month_amount
+      from (select formatted_name, registered_entity_id, pl_production_org_id from minnesota_campaign_finance_committees state = 'MN') t1
+   join (select site_source_committee_id, sum(cash_amount) as month_amount from minnesota_campaign_finance_contribution
+   where cash_amount > 0 and year(received_date) = '#{y}' and month(received_date) = '#{m}' group by site_source_committee_id) t2
+   on t1.registered_entity_id = t2.site_source_committee_id
+   order by month_amount desc
+   limit 50;)
   end
 
+  def story_type_table(raw_committees)
+    districts = raw_districts.map do |row|
+      [
+          row['rank'],
+          row['district'],
+          Formatize::Money.add_commas(row['salary'])
+      ]
+    end
+
+    StoryTable.new(header: %w[Rank District Salary], content: districts).to_json
+  end
 
 
   def population(options)
