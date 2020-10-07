@@ -133,7 +133,7 @@ class S18
       month = stage['month'].to_i
       table = StoryTable.new.from_json(stage['table_data']).to_html
 
-      wi_cf_link = 'Wisconsin Campaign Finance Information System'.to_link('https://cfis.wi.gov/Public/Registration.aspx?page=ReceiptList/')
+      wi_cf_link = 'Minnesota Campaign Finance Board'.to_link('https://cfis.wi.gov/Public/Registration.aspx?page=ReceiptList/')
 
       sample[:headline] = "What political committees received the most in contributions during #{month_name(month)}?"
       sample[:teaser] = "Here #{committees_num == 1 ? "is" : "are"} the #{committees_num >= 10 ? committees_num : Formatize::Numbers.in_words(committees_num)} political #{plural('committee', committees_num)} that received #{committees_num >=50 ? "most money from contributions" : "money from contributions"} during #{month_name(month)}."
