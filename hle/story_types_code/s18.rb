@@ -39,8 +39,8 @@ class S18
 
 
   def committees_query(m, y)
-    %(select t1.formatted_name as committee_name, t1.registered_entity_id, t1.pl_production_org_id, t2.month_amount
-      from (select formatted_name, registered_entity_id, pl_production_org_id from minnesota_campaign_finance_committees where state = 'MN') t1
+    %(select t1.committee_name, t1.registered_entity_id, t1.pl_production_org_id, t2.month_amount
+      from (select ifnull(committee_name_clean, formatted_name) as committee_name, registered_entity_id, pl_production_org_id from minnesota_campaign_finance_committees where state = 'MN') t1
    join (select site_source_committee_id, sum(cash_amount) as month_amount from minnesota_campaign_finance_contribution
    where cash_amount > 0 and year(received_date) = '#{y}' and month(received_date) = '#{m}' group by site_source_committee_id) t2
    on t1.registered_entity_id = t2.site_source_committee_id
