@@ -5,8 +5,7 @@ require 'mysql2'
 require 'json'
 require 'colorize'
 require 'slack-ruby-client'
-require 'active_support/core_ext/time'
-require 'active_support/core_ext/hash'
+require 'active_support/core_ext'
 
 require_relative '../config/databases.rb'
 require_relative 'mini_loki_c/connect/mysql.rb'
@@ -46,7 +45,7 @@ module MiniLokiC
     else
       raise ArgumentError,
             'Please pass me one of these arguments: '\
-            'population creation upload download tool export_backdated'
+            'population creation upload download tool'
     end
   end
 end
