@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require 'time'
-
 require 'mysql2'
 require 'json'
 require 'colorize'
 require 'slack-ruby-client'
+require 'active_support/core_ext/time'
+require 'active_support/core_ext/hash'
 
 require_relative '../config/databases.rb'
 require_relative 'mini_loki_c/connect/mysql.rb'
