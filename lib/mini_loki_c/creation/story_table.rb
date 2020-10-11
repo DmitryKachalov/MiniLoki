@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module MiniLokiC
   module Creation
     # class for build a table for the story body
@@ -85,7 +83,7 @@ module MiniLokiC
 
       # conditions should be a hash with column name(s) as key(s) and value(s) from a row which need to be marked as value(s)
       # if soft = true it won't raise exception if can't find any row by conditions in the table (use it when a table is about "top N ...")
-      def mark_row(conditions = nil, color: '#ffffb9', soft: false )
+      def mark_row(conditions = nil, color: '#ffffb9', soft: false)
         find_rows(conditions, soft)
         @options[:markers] = [] unless @options[:markers]
         h = { conditions: conditions, color: color }.with_indifferent_access
@@ -94,7 +92,7 @@ module MiniLokiC
       end
 
       # it similar to mark_row, but allows to mark a cell instead of whole row
-      def mark_cell(conditions = nil, column = nil, color: '#99ccff', soft: false )
+      def mark_cell(conditions = nil, column = nil, color: '#99ccff', soft: false)
         raise 'Column name required!' if column.nil?
         raise "Wrong column name '#{column}'!" unless @header.include?(column)
 
@@ -152,9 +150,8 @@ module MiniLokiC
 
         clmn_numb =
           case arg
-          when Integer; arg
-          when String; @header.index(arg)
-          else; nil
+          when Integer then arg
+          when String then @header.index(arg)
           end
 
         return self if clmn_numb.nil?
@@ -188,7 +185,7 @@ module MiniLokiC
 
       def delete_empty_columns!(empty_value = '')
         empty_cols = []
-        (0..@header.count-1).each do |col_num|
+        (0..@header.count - 1).each do |col_num|
           empty_cols << col_num if @content.all? { |r| r[col_num] == empty_value }
         end
 
@@ -246,7 +243,7 @@ module MiniLokiC
       end
 
       def empty_row
-        @header.map { |c| '' }
+        @header.map { |_c| '' }
       end
 
       def find_rows(conditions, soft)
@@ -254,7 +251,7 @@ module MiniLokiC
           raise 'Conditions should be a Hash with at least one pair key-value!'
         end
 
-        selected_rows_indexes = (0..@content.count-1).to_a
+        selected_rows_indexes = (0..@content.count - 1).to_a
         conditions.each do |condition|
           idx = @header.index(condition[0].to_s)
           raise "Wrong condition '#{Hash[*condition]}' - key was not found among column headers!" if idx.nil?
@@ -286,7 +283,7 @@ module MiniLokiC
         return nil if arr.nil?
 
         if !arr[0].is_a?(Array)
-          arr.map { |v| v.to_s.gsub('%%%','"')}
+          arr.map { |v| v.to_s.gsub('%%%', '"') }
         else
           arr.map { |v| quote(v) }
         end
@@ -296,9 +293,9 @@ module MiniLokiC
         return nil if arr.nil?
 
         if arr[0].is_a?(Array)
-          arr.map { |v| unquote(v)}
+          arr.map { |v| unquote(v) }
         else
-          arr.map { |v| v.to_s.gsub('"','%%%')}
+          arr.map { |v| v.to_s.gsub('"', '%%%') }
         end
       end
     end
