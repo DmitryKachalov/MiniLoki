@@ -62,9 +62,10 @@ module ExportBackdated
         limit 1000;)
     end
 
-    def update_sample_query(id, story_id)
+    def update_sample_query(id, lead_id, story_id)
       %(update samples
-        set pl_production_id = #{story_id},
+        set pl_production_lead_id = #{lead_id},
+            pl_production_story_id = #{story_id},
             exported_at = current_timestamp()
         where id = #{id};)
     end
