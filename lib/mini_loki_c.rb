@@ -5,7 +5,7 @@ require 'mysql2'
 require 'json'
 require 'colorize'
 require 'slack-ruby-client'
-require 'active_support/core_ext'
+require 'active_support/all'
 
 require_relative '../config/databases.rb'
 require_relative 'mini_loki_c/connect/mysql.rb'
