@@ -23,8 +23,10 @@ module MiniLokiC
               0
             when NilClass
               'NULL'
-            else
+            when Array, Hash
               val.to_json.dump
+            else
+              val.to_json
             end
 
           keys << key
