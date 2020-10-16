@@ -7,7 +7,7 @@
 class S16
   include MiniLokiC::Connect
   include MiniLokiC::Population
-  include MiniLokiC::Population::Formatize
+  include MiniLokiC::Formatize
   include MiniLokiC::Creation
   
   STAGING_TABLE = 's16_staging'
