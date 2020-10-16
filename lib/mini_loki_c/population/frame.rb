@@ -2,7 +2,7 @@
 
 module MiniLokiC
   module Population
-    module TimeFrame
+    module Frame
       class LokiCDate < Date
         def quarter
           case self.month
