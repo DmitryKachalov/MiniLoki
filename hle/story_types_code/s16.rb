@@ -47,8 +47,7 @@ class S16
           h['table']            = data[:table].to_json
           h['time_frame']       = Frame[:weekly, data[:date].to_s]
           
-          nolog { p h.select { |k, v| k != 'table' } }
-          # host.query(SQL.insert_on_duplicate_key(STAGING_TABLE, h))
+          host.query(SQL.insert_on_duplicate_key(STAGING_TABLE, h))
           host.close
         end
       end
