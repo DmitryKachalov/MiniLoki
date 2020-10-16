@@ -8,7 +8,5 @@ require_relative 'formatize/address.rb'
 require_relative 'formatize/percents.rb'
 
 module MiniLokiC
-  module Population
-    module Formatize; end
-  end
+  module Formatize; end
 end
