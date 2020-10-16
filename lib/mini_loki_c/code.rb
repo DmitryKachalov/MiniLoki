@@ -31,7 +31,8 @@ module MiniLokiC
         MiniLokiC::Connect,
         MiniLokiC::Formatize,
         MiniLokiC::Population,
-        MiniLokiC::Creation
+        MiniLokiC::Creation,
+        MiniLokiC::NoLog
       )
 
       story_type_class.new.send(@method, @options)

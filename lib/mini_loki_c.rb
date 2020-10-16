@@ -13,6 +13,7 @@ require_relative 'mini_loki_c/initialization.rb'
 require_relative 'mini_loki_c/formatize.rb'
 require_relative 'mini_loki_c/population.rb'
 require_relative 'mini_loki_c/creation.rb'
+require_relative 'mini_loki_c/no_log.rb'
 require_relative 'mini_loki_c/code.rb'
 
 require_relative 'pipeline.rb'
