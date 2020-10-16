@@ -14,7 +14,7 @@ class S16
     @mode   = options['fill'].nil? ? "= #{week}" : "<= #{week}"
     source_query
     
-    @source.each do |week, committees|
+    @source.each do |weekend, committees|
       committees.each do |committee, data|
         publications = [
           Publications.by_org_client_id(data[:org_id], [120]),
@@ -35,13 +35,14 @@ class S16
           h['publication_name'] = pub['publication_name']
           h['client_id']        = pub['client_id']
           h['client_name']      = pub['client_name']
-          h['date']             = week
+          h['weekend']          = weekend
           h['committee']        = committee
           h['type']             = type
           h['amount']           = data[:amount]
           h['table']            = data[:table].to_json
           h['time_frame']       = Frame[:weekly, data[:date].to_s]
           
+          nolog { p h.select { |k, v| k != 'table' } }
           host.query(SQL.insert_on_duplicate_key(STAGING_TABLE, h))
           host.close
         end
@@ -55,25 +56,27 @@ class S16
     samples = Samples.new(STAGING_TABLE, options)
   
     StagingRecords[STAGING_TABLE, options].each do |stage|
-      sample = {}
-      sample[:staging_row_id]   = stage['id']
-      sample[:publication_id]   = stage['publication_id']
-      sample[:organization_ids] = stage['organization_ids']
-      sample[:time_frame]       = stage['time_frame']
+      stage = stage.transform_keys(&:to_sym)
+      
+      sample                    = {}
+      sample[:staging_row_id]   = stage[:id]
+      sample[:publication_id]   = stage[:publication_id]
+      sample[:organization_ids] = stage[:organization_ids]
+      sample[:time_frame]       = stage[:time_frame]
 
-      date      = Date.parse(stage[:date.to_s]).strftime("%B %-d")
-      committee = stage[:committee.to_s]
-      amount    = stage[:amount.to_s]
-      type      = stage[:type.to_s]
-      table     = StoryTable(stage['table'])
+      weekend   = Date.parse(stage[:weekend]).strftime("%B %-d")
+      committee = stage[:committee]
+      amount    = Numbers.add_commas(stage[:amount])
+      type      = stage[:type]
+      table     = StoryTable(stage[:table])
       url       = 'https://mec.mo.gov/'
 
-      sample[:headline] = "Who contributed to #{committee} during week ending #{date}".squeeze(' ')
-      sample[:teaser]   = "#{committee}#{type} received #{amount} during the week ending #{date}.".squeeze(' ')
+      sample[:headline] = "Who contributed to #{committee} during week ending #{weekend}".squeeze(' ')
+      sample[:teaser]   = "#{committee}#{type} received #{amount} during the week ending #{weekend}.".squeeze(' ')
       sample[:body]     = <<~BODY.squeeze(' ').chomp
-        #{committee}#{type} received #{amount} during the week ending #{date}.
-        Here are the 100 largest contributions that #{committee} received during the week ending #{date}, according to \
-        the #{'Missouri Ethic Commission'.to_link(url)}.
+        #{committee}#{type} received #{amount} during the week ending #{weekend}.
+        Here are the 100 largest contributions that #{committee} received during the week ending #{weekend}, according \
+        to the #{'Missouri Ethic Commission'.to_link(url)}.
         #{table}
       BODY
 
