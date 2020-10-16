@@ -129,10 +129,4 @@ class S16
       @source[weekend][el[:committee]][:table].content << [el[:date].to_s, el[:contributor].squeeze(' '), "$#{Numbers.add_commas(el[:amount])}"]
     end
   end
-  
-  def nolog
-    return if ENV['RAILS_ENV']
-    
-    yield if block_given?
-  end
 end
