@@ -5,11 +5,6 @@
 # branch: art_jarocki_stories
 
 class S16
-  include MiniLokiC::Connect
-  include MiniLokiC::Population
-  include MiniLokiC::Formatize
-  include MiniLokiC::Creation
-  
   STAGING_TABLE = 's16_staging'
   
   def population(options)
