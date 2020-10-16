@@ -25,7 +25,17 @@ module MiniLokiC
 
     def exec
       load file
-      Object.const_get("S#{@story_type_id}").new.send(@method, @options)
+      story_type_class = Object.const_get("S#{@story_type_id}")
+
+      story_type_class.include(
+        MiniLokiC::Connect,
+        MiniLokiC::Formatize,
+        MiniLokiC::Population,
+        MiniLokiC::Creation,
+        MiniLokiC::NoLog
+      )
+
+      story_type_class.new.send(@method, @options)
     end
 
     def upload
